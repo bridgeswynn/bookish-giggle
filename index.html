@@ -47,7 +47,7 @@
             position: fixed;
             inset: 0;
             z-index: 50;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.78);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             display: flex;
@@ -85,6 +85,43 @@
 
         .pill-tab-btn:hover {
             transform: translateY(-3px) scale(1.03);
+        }
+
+        /* 3D Card Flip Animations for Memory Game */
+        .memory-card-scene {
+            perspective: 1000px;
+        }
+        .memory-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .memory-card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .memory-card-front, .memory-card-back {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+        }
+        .memory-card-front {
+            background: linear-gradient(135deg, #ffffff 60%, #f0f9ff 100%);
+            border: 3px solid #38bdf8;
+            transform: rotateY(180deg);
+        }
+        .memory-card-back {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border: 3px solid #ffffff;
+            color: white;
         }
 
         /* SVG Wing Flap Animations */
@@ -174,25 +211,28 @@
         </div>
     </header>
 
-    <!-- MAIN SCREEN CENTER AREA (Shows background graphic until a tab is clicked) -->
+    <!-- MAIN SCREEN CENTER AREA -->
     <main class="relative z-10 flex-grow flex items-center justify-center pointer-events-none"></main>
 
-    <!-- CENTER-BOTTOM FLOATING TABS DOCK -->
-    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 center-pill-dock p-2.5 rounded-full flex items-center gap-3 max-w-[95vw] pointer-events-auto">
-        <button id="pill-btn-1" onclick="openPill('pill-1')" class="pill-tab-btn px-6 py-3.5 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold font-fredoka text-base md:text-xl rounded-full shadow-lg flex items-center gap-3 cursor-pointer whitespace-nowrap">
-            <span class="text-2xl">🎴</span> <span>Flashcards</span>
+    <!-- CENTER-BOTTOM FLOATING TABS DOCK (4 TABS) -->
+    <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 center-pill-dock p-2.5 rounded-full flex items-center gap-2 md:gap-3 max-w-[98vw] pointer-events-auto">
+        <button id="pill-btn-1" onclick="openPill('pill-1')" class="pill-tab-btn px-5 py-3 md:px-6 md:py-3.5 bg-gradient-to-r from-sky-500 to-sky-600 text-white font-bold font-fredoka text-sm md:text-lg rounded-full shadow-lg flex items-center gap-2.5 cursor-pointer whitespace-nowrap">
+            <span class="text-xl md:text-2xl">🎴</span> <span>Flashcards</span>
         </button>
-        <button id="pill-btn-2" onclick="openPill('pill-2')" class="pill-tab-btn px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold font-fredoka text-base md:text-xl rounded-full shadow-lg flex items-center gap-3 cursor-pointer whitespace-nowrap">
-            <span class="text-2xl">🐤</span> <span>Spelling Challenge</span>
+        <button id="pill-btn-2" onclick="openPill('pill-2')" class="pill-tab-btn px-5 py-3 md:px-6 md:py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold font-fredoka text-sm md:text-lg rounded-full shadow-lg flex items-center gap-2.5 cursor-pointer whitespace-nowrap">
+            <span class="text-xl md:text-2xl">🐤</span> <span>Spelling Challenge</span>
         </button>
-        <button id="pill-btn-3" onclick="openPill('pill-3')" class="pill-tab-btn px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold font-fredoka text-base md:text-xl rounded-full shadow-lg flex items-center gap-3 cursor-pointer whitespace-nowrap">
-            <span class="text-2xl">📅</span> <span>What day is it?</span>
+        <button id="pill-btn-3" onclick="openPill('pill-3')" class="pill-tab-btn px-5 py-3 md:px-6 md:py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold font-fredoka text-sm md:text-lg rounded-full shadow-lg flex items-center gap-2.5 cursor-pointer whitespace-nowrap">
+            <span class="text-xl md:text-2xl">📅</span> <span>What day is it?</span>
+        </button>
+        <button id="pill-btn-4" onclick="openPill('pill-4')" class="pill-tab-btn px-5 py-3 md:px-6 md:py-3.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold font-fredoka text-sm md:text-lg rounded-full shadow-lg flex items-center gap-2.5 cursor-pointer whitespace-nowrap">
+            <span class="text-xl md:text-2xl">🧠</span> <span>Memory Game</span>
         </button>
     </nav>
 
 
     <!-- ===================================================================
-         FULLSCREEN OVERLAY 1: LARGE FLASHCARDS CAROUSEL
+         FULLSCREEN OVERLAY 1: LARGE FLASHCARDS CAROUSEL (WITH PHONETICS)
          =================================================================== -->
     <section id="pill-1" class="fullscreen-window p-4 md:p-8">
         <div class="max-w-5xl mx-auto w-full h-full flex flex-col">
@@ -212,14 +252,13 @@
 
             <!-- Carousel Display Area -->
             <div class="flex-grow flex items-center justify-center relative my-auto">
-                <!-- Left Navigation Arrow -->
                 <button onclick="prevCard()" class="absolute left-0 md:left-4 z-20 w-16 h-16 md:w-20 md:h-20 bg-white/90 hover:bg-white text-sky-600 rounded-full shadow-2xl border-4 border-sky-300 flex items-center justify-center text-3xl font-bold transition transform active:scale-90 cursor-pointer">
                     ◄
                 </button>
 
-                <!-- Giant Flashcard -->
+                <!-- Giant Text Flashcard with Pronunciation Guide -->
                 <div id="flashcard-card" onclick="triggerCardAudio()" 
-                     class="glass-panel w-full max-w-2xl h-[480px] md:h-[540px] p-8 mx-12 flex flex-col items-center justify-between shadow-2xl cursor-pointer transform hover:scale-[1.02] transition duration-200">
+                     class="glass-panel w-full max-w-2xl h-[420px] md:h-[480px] p-8 mx-12 flex flex-col items-center justify-between shadow-2xl cursor-pointer transform hover:scale-[1.02] transition duration-200">
                     
                     <div class="w-full flex items-center justify-between">
                         <span id="fc-day-tag" class="text-base md:text-lg font-bold px-5 py-2 rounded-full text-white shadow-md">
@@ -230,22 +269,25 @@
                         </span>
                     </div>
 
-                    <div id="fc-bird-svg" class="my-auto transform scale-125 md:scale-150"></div>
-
-                    <div class="text-center w-full">
-                        <div id="fc-day-name" class="text-5xl md:text-7xl font-bold font-fredoka text-slate-800 tracking-wide">
+                    <div class="my-auto text-center w-full flex flex-col items-center justify-center gap-4">
+                        <div id="fc-day-name" class="text-6xl md:text-8xl font-bold font-fredoka text-slate-800 tracking-wide">
                             Monday
                         </div>
+                        <div id="fc-phonetic" class="text-2xl md:text-4xl font-semibold font-fredoka text-sky-600 bg-sky-50/90 px-8 py-2.5 rounded-full border-2 border-sky-200 shadow-inner">
+                            /MUND·ay/
+                        </div>
+                    </div>
+
+                    <div class="w-full text-center text-xs text-slate-400 font-bold uppercase tracking-wider">
+                        Tap anywhere to hear pronunciation
                     </div>
                 </div>
 
-                <!-- Right Navigation Arrow -->
                 <button onclick="nextCard()" class="absolute right-0 md:right-4 z-20 w-16 h-16 md:w-20 md:h-20 bg-white/90 hover:bg-white text-sky-600 rounded-full shadow-2xl border-4 border-sky-300 flex items-center justify-center text-3xl font-bold transition transform active:scale-90 cursor-pointer">
                     ►
                 </button>
             </div>
 
-            <!-- Page Counter Indicator -->
             <div class="flex justify-center pb-8">
                 <span id="fc-counter" class="bg-white/90 backdrop-blur-md px-6 py-2 rounded-full font-bold font-fredoka text-sky-700 text-lg shadow-lg">
                     1 / 7
@@ -256,11 +298,10 @@
 
 
     <!-- ===================================================================
-         FULLSCREEN OVERLAY 2: BIRD SPELLING CHALLENGE (15 ROUNDS)
+         FULLSCREEN OVERLAY 2: BIRD SPELLING CHALLENGE
          =================================================================== -->
     <section id="pill-2" class="fullscreen-window p-4 md:p-8">
         <div class="max-w-6xl mx-auto w-full h-full flex flex-col">
-            <!-- Window Header -->
             <div class="flex items-center justify-between text-white mb-4">
                 <div class="flex items-center gap-3">
                     <span class="text-4xl bg-emerald-500 p-2.5 rounded-2xl">🐤</span>
@@ -274,7 +315,6 @@
                 </button>
             </div>
 
-            <!-- Top Game HUD Header -->
             <div class="bg-white/95 rounded-3xl p-4 mb-4 border-2 border-emerald-300 flex flex-wrap items-center justify-between gap-4 shadow-xl">
                 <div class="flex items-center gap-3">
                     <div class="bg-sky-50 px-4 py-2 rounded-2xl border border-sky-200 text-center">
@@ -291,7 +331,6 @@
                     </div>
                 </div>
 
-                <!-- Word Display Container with Interactive Letter Slots -->
                 <div class="flex-grow text-center bg-gradient-to-r from-emerald-600 to-teal-600 py-3 px-6 rounded-2xl text-white shadow-inner">
                     <div class="text-xs font-bold text-emerald-200 uppercase tracking-widest mb-1">Catch the Missing Letters</div>
                     <div id="spelling-word-display" class="flex items-center justify-center text-3xl md:text-5xl font-bold font-fredoka tracking-wider">
@@ -304,11 +343,9 @@
                 </button>
             </div>
 
-            <!-- Flying Sky Interactive Area -->
             <div id="spelling-sky-area" class="relative flex-grow bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 rounded-3xl border-4 border-white shadow-2xl overflow-hidden mb-4">
                 <div id="spelling-birds-layer" class="relative w-full h-full z-10"></div>
 
-                <!-- Game Overlay Screen -->
                 <div id="spelling-start-overlay" class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-6 text-white text-center">
                     <span class="text-7xl mb-4 animate-bounce">🐤</span>
                     <h3 class="text-3xl md:text-4xl font-bold font-fredoka mb-2">Flying Bird Spelling Quiz</h3>
@@ -327,7 +364,6 @@
          =================================================================== -->
     <section id="pill-3" class="fullscreen-window p-4 md:p-8">
         <div class="max-w-6xl mx-auto w-full h-full flex flex-col">
-            <!-- Window Header -->
             <div class="flex items-center justify-between text-white mb-4">
                 <div class="flex items-center gap-3">
                     <span class="text-4xl bg-amber-500 p-2.5 rounded-2xl">📅</span>
@@ -341,9 +377,7 @@
                 </button>
             </div>
 
-            <!-- Quiz Layout Container -->
             <div class="flex-grow grid grid-cols-1 md:grid-cols-12 gap-6 items-center my-auto">
-                <!-- Calendar Component -->
                 <div class="md:col-span-7 bg-white p-6 rounded-3xl border-2 border-amber-300 shadow-2xl">
                     <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                         <h3 id="cal-month-title" class="text-2xl font-bold font-fredoka text-amber-600">October 2026</h3>
@@ -357,7 +391,6 @@
                     <div id="cal-grid" class="grid grid-cols-7 gap-2 text-center"></div>
                 </div>
 
-                <!-- Answer Choices Component -->
                 <div class="md:col-span-5 flex flex-col justify-center gap-6 bg-white/90 p-8 rounded-3xl border-2 border-amber-200 shadow-2xl">
                     <div class="text-center">
                         <span class="text-xs font-bold text-amber-600 uppercase tracking-widest block mb-1">Calendar Prompt</span>
@@ -378,19 +411,70 @@
     </section>
 
 
+    <!-- ===================================================================
+         FULLSCREEN OVERLAY 4: 14-CARD MEMORY MATCHING GAME
+         =================================================================== -->
+    <section id="pill-4" class="fullscreen-window p-4 md:p-8">
+        <div class="max-w-7xl mx-auto w-full h-full flex flex-col justify-center">
+            <!-- Header section centered and grouped with cards -->
+            <div class="flex flex-col items-center mb-4">
+                <div class="w-full flex items-center justify-between text-white mb-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-4xl bg-purple-500 p-2.5 rounded-2xl">🧠</span>
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-bold font-fredoka">Weekday Memory Game</h2>
+                            <p class="text-xs md:text-sm text-purple-200">Memorize the 14 cards, then press Start to match the pairs!</p>
+                        </div>
+                    </div>
+                    <button onclick="closePill('pill-4')" class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-bold font-fredoka text-base md:text-lg rounded-full shadow-xl transition transform active:scale-95 flex items-center gap-2 cursor-pointer">
+                        <span>✕</span> <span>CLOSE</span>
+                    </button>
+                </div>
+
+                <div class="w-full bg-white/95 rounded-3xl p-4 border-2 border-purple-300 flex items-center justify-between gap-4 shadow-xl">
+                    <div class="flex items-center gap-4">
+                        <button id="memory-start-btn" onclick="startMemoryGame()" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold font-fredoka text-lg rounded-2xl shadow-lg transition transform active:scale-95 cursor-pointer">
+                            ▶ START GAME
+                        </button>
+                        <span id="memory-status-tag" class="text-sm font-bold px-4 py-2 bg-amber-100 text-amber-800 rounded-xl border border-amber-300">
+                            Previewing Cards...
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="bg-purple-50 px-4 py-2 rounded-2xl border border-purple-200 text-center">
+                            <span class="text-[10px] text-purple-500 font-bold uppercase block tracking-wider">Matches</span>
+                            <span id="memory-matches" class="text-xl font-bold font-fredoka text-purple-700">0 / 7</span>
+                        </div>
+                        <div class="bg-sky-50 px-4 py-2 rounded-2xl border border-sky-200 text-center">
+                            <span class="text-[10px] text-sky-500 font-bold uppercase block tracking-wider">Moves</span>
+                            <span id="memory-moves" class="text-xl font-bold font-fredoka text-sky-700">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Centered & Enlarged 14 Cards Grid with reduced gap to bottom dock -->
+            <div id="memory-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6 my-auto items-center justify-center pb-24">
+                <!-- 14 Cards auto-rendered by JS -->
+            </div>
+        </div>
+    </section>
+
+
     <!-- APPLICATION LOGIC & AUDIO ENGINE -->
     <script>
         /* ==========================================================================
            1. DATA CONFIGURATION & AUDIO INITIALIZATION
            ========================================================================== */
         const WEEKDAYS = [
-            { id: 'monday', dayNum: 1, english: 'Monday', short: 'Mon', fileName: 'monday.mp3', color: '#3b82f6', bgLight: '#dbeafe' },
-            { id: 'tuesday', dayNum: 2, english: 'Tuesday', short: 'Tue', fileName: 'tuesday.mp3', color: '#ef4444', bgLight: '#fee2e2' },
-            { id: 'wednesday', dayNum: 3, english: 'Wednesday', short: 'Wed', fileName: 'wednesday.mp3', color: '#06b6d4', bgLight: '#cffaff' },
-            { id: 'thursday', dayNum: 4, english: 'Thursday', short: 'Thu', fileName: 'thursday.mp3', color: '#10b981', bgLight: '#d1fae5' },
-            { id: 'friday', dayNum: 5, english: 'Friday', short: 'Fri', fileName: 'friday.mp3', color: '#eab308', bgLight: '#fef9c3' },
-            { id: 'saturday', dayNum: 6, english: 'Saturday', short: 'Sat', fileName: 'saturday.mp3', color: '#8b5cf6', bgLight: '#f3e8ff' },
-            { id: 'sunday', dayNum: 7, english: 'Sunday', short: 'Sun', fileName: 'sunday.mp3', color: '#f97316', bgLight: '#ffedd5' }
+            { id: 'monday', dayNum: 1, english: 'Monday', phonetic: '/MUND·ay/', short: 'Mon', fileName: 'monday.mp3', color: '#3b82f6', bgLight: '#dbeafe' },
+            { id: 'tuesday', dayNum: 2, english: 'Tuesday', phonetic: '/TOOZ·day/', short: 'Tue', fileName: 'tuesday.mp3', color: '#ef4444', bgLight: '#fee2e2' },
+            { id: 'wednesday', dayNum: 3, english: 'Wednesday', phonetic: '/WENZ·day/', short: 'Wed', fileName: 'wednesday.mp3', color: '#06b6d4', bgLight: '#cffaff' },
+            { id: 'thursday', dayNum: 4, english: 'Thursday', phonetic: '/THURZ·day/', short: 'Thu', fileName: 'thursday.mp3', color: '#10b981', bgLight: '#d1fae5' },
+            { id: 'friday', dayNum: 5, english: 'Friday', phonetic: '/FRY·day/', short: 'Fri', fileName: 'friday.mp3', color: '#eab308', bgLight: '#fef9c3' },
+            { id: 'saturday', dayNum: 6, english: 'Saturday', phonetic: '/SAT·ur·day/', short: 'Sat', fileName: 'saturday.mp3', color: '#8b5cf6', bgLight: '#f3e8ff' },
+            { id: 'sunday', dayNum: 7, english: 'Sunday', phonetic: '/SUN·day/', short: 'Sun', fileName: 'sunday.mp3', color: '#f97316', bgLight: '#ffedd5' }
         ];
 
         let isMuted = false;
@@ -412,7 +496,7 @@
             document.getElementById('sound-icon').innerText = isMuted ? '🔇' : '🔊';
         }
 
-        /* Interactive Web Audio Synthesizer for bird chirps and sound effects */
+        /* Interactive Web Audio Synthesizer */
         function playSoundFx(type) {
             if (isMuted) return;
             initAudio();
@@ -508,7 +592,7 @@
            ========================================================================== */
         function openPill(pillId) {
             initAudio();
-            ['pill-1', 'pill-2', 'pill-3'].forEach(id => {
+            ['pill-1', 'pill-2', 'pill-3', 'pill-4'].forEach(id => {
                 const win = document.getElementById(id);
                 if (id === pillId) {
                     win.classList.add('active-window');
@@ -523,6 +607,8 @@
                 startContinuousBirdAudio();
             } else if (pillId === 'pill-3') {
                 generateRandomCalendarQuiz();
+            } else if (pillId === 'pill-4') {
+                initMemoryGame();
             }
         }
 
@@ -535,7 +621,7 @@
 
 
         /* ==========================================================================
-           4. PILL 1: LARGE CAROUSEL FLASHCARDS
+           4. PILL 1: FLASHCARDS
            ========================================================================== */
         function renderCard() {
             const day = WEEKDAYS[currentCardIdx];
@@ -543,10 +629,11 @@
             
             document.getElementById('fc-day-tag').innerText = `Day ${day.dayNum}`;
             document.getElementById('fc-day-tag').style.backgroundColor = day.color;
-            document.getElementById('fc-bird-svg').innerHTML = createBirdSVG(day.color, '', 100);
-            document.getElementById('fc-day-name').innerText = day.english;
-            document.getElementById('fc-counter').innerText = `${currentCardIdx + 1} / ${WEEKDAYS.length}`;
             
+            document.getElementById('fc-day-name').innerText = day.english;
+            document.getElementById('fc-phonetic').innerText = day.phonetic;
+            
+            document.getElementById('fc-counter').innerText = `${currentCardIdx + 1} / ${WEEKDAYS.length}`;
             cardEl.style.background = `linear-gradient(135deg, #ffffff 65%, ${day.bgLight} 100%)`;
         }
 
@@ -569,7 +656,7 @@
 
 
         /* ==========================================================================
-           5. PILL 2: BIRD SPELLING CHALLENGE (TITLE CASE, MULTI-MISSING, NON-CHRONO)
+           5. PILL 2: BIRD SPELLING CHALLENGE
            ========================================================================== */
         let spellingRound = 1;
         let spellingScore = 0;
@@ -613,11 +700,9 @@
                 return;
             }
 
-            // Select random day in standard Title Case (e.g. Monday, Tuesday)
             currentWordData = WEEKDAYS[Math.floor(Math.random() * WEEKDAYS.length)];
             targetWordStr = currentWordData.english;
             
-            // Randomly choose 2 or 3 missing letter indices
             const numMissing = Math.random() < 0.5 ? 2 : 3;
             missingIndices = [];
             while (missingIndices.length < numMissing) {
@@ -630,7 +715,6 @@
             userFilledMap = {};
             renderWordSlots();
 
-            // Gather candidate letters (correct missing letters + distractors)
             const neededLetters = missingIndices.map(idx => targetWordStr[idx]);
             const distractors = [];
             const alphabetLower = 'abcdefghijklmnopqrstuvwxyz';
@@ -649,7 +733,6 @@
             const allBirdLetters = [...neededLetters, ...distractors];
             allBirdLetters.sort(() => Math.random() - 0.5);
 
-            // Launch all birds into the sky simultaneously
             allBirdLetters.forEach((letter, index) => {
                 spawnSpellingBird(letter, index, allBirdLetters.length);
             });
@@ -708,9 +791,7 @@
             spellingActiveBirds.push({ element: birdEl, interval: animateId });
         }
 
-        /* Non-chronological letter checking */
         function checkBirdClick(letter, birdEl) {
-            // Find an unfilled missing slot matching this letter
             const matchingSlotIdx = missingIndices.find(idx => targetWordStr[idx] === letter && !userFilledMap[idx]);
 
             if (matchingSlotIdx !== undefined) {
@@ -720,7 +801,6 @@
 
                 birdEl.classList.add('opacity-30', 'pointer-events-none');
 
-                // Check if all missing slots for the word are complete
                 const isComplete = missingIndices.every(idx => userFilledMap[idx] !== undefined);
 
                 if (isComplete) {
@@ -743,7 +823,6 @@
             }
         }
 
-        /* Continuous Ambient Bird Chirping while flying */
         function startContinuousBirdAudio() {
             stopContinuousBirdAudio();
             birdSoundInterval = setInterval(() => {
@@ -861,7 +940,120 @@
 
 
         /* ==========================================================================
-           7. FULLSCREEN TOGGLE SYSTEM
+           7. PILL 4: 14-CARD MEMORY MATCHING GAME (ENLARGED CARDS)
+           ========================================================================== */
+        let memoryCards = [];
+        let memoryFlippedCards = [];
+        let memoryMatchedCount = 0;
+        let memoryMoves = 0;
+        let memoryGameStarted = false;
+        let memoryLockBoard = false;
+
+        function initMemoryGame() {
+            memoryMatchedCount = 0;
+            memoryMoves = 0;
+            memoryFlippedCards = [];
+            memoryGameStarted = false;
+            memoryLockBoard = false;
+
+            document.getElementById('memory-matches').innerText = `0 / 7`;
+            document.getElementById('memory-moves').innerText = `0`;
+            document.getElementById('memory-status-tag').innerText = `Previewing Cards...`;
+            document.getElementById('memory-status-tag').className = `text-sm font-bold px-4 py-2 bg-amber-100 text-amber-800 rounded-xl border border-amber-300`;
+            document.getElementById('memory-start-btn').classList.remove('hidden');
+
+            const deck = [...WEEKDAYS, ...WEEKDAYS].map((day, idx) => ({
+                uniqueId: idx,
+                dayId: day.id,
+                english: day.english,
+                phonetic: day.phonetic,
+                color: day.color,
+                bgLight: day.bgLight
+            }));
+
+            deck.sort(() => Math.random() - 0.5);
+            memoryCards = deck;
+
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = memoryCards.map((card, idx) => `
+                <div class="memory-card-scene h-44 sm:h-56 lg:h-64 cursor-pointer" onclick="handleMemoryCardClick(${idx})">
+                    <div id="memory-card-inner-${idx}" class="memory-card-inner is-flipped">
+                        <div class="memory-card-front p-4 text-center" style="background: linear-gradient(135deg, #ffffff 60%, ${card.bgLight} 100%);">
+                            <span class="text-sm sm:text-base font-bold px-4 py-1.5 rounded-full text-white mb-2 shadow-sm" style="background-color: ${card.color}">
+                                ${card.english}
+                            </span>
+                            <span class="text-base sm:text-lg text-sky-700 font-bold font-fredoka">${card.phonetic}</span>
+                        </div>
+                        <div class="memory-card-back">
+                            <span class="text-5xl sm:text-6xl font-fredoka">❓</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function startMemoryGame() {
+            memoryGameStarted = true;
+            document.getElementById('memory-start-btn').classList.add('hidden');
+            document.getElementById('memory-status-tag').innerText = `Game In Progress - Match Pairs!`;
+            document.getElementById('memory-status-tag').className = `text-sm font-bold px-4 py-2 bg-emerald-100 text-emerald-800 rounded-xl border border-emerald-300`;
+
+            memoryCards.forEach((_, idx) => {
+                const inner = document.getElementById(`memory-card-inner-${idx}`);
+                if (inner) inner.classList.remove('is-flipped');
+            });
+            playSoundFx('chirp');
+        }
+
+        function handleMemoryCardClick(index) {
+            if (!memoryGameStarted || memoryLockBoard) return;
+            const inner = document.getElementById(`memory-card-inner-${index}`);
+            if (inner.classList.contains('is-flipped')) return;
+
+            inner.classList.add('is-flipped');
+            playSoundFx('chirp');
+            memoryFlippedCards.push({ index, card: memoryCards[index] });
+
+            if (memoryFlippedCards.length === 2) {
+                memoryMoves++;
+                document.getElementById('memory-moves').innerText = memoryMoves;
+                checkMemoryMatch();
+            }
+        }
+
+        function checkMemoryMatch() {
+            memoryLockBoard = true;
+            const [first, second] = memoryFlippedCards;
+
+            if (first.card.dayId === second.card.dayId) {
+                playSoundFx('correct');
+                playDayAudio(first.card.dayId, first.card.english);
+                memoryMatchedCount++;
+                document.getElementById('memory-matches').innerText = `${memoryMatchedCount} / 7`;
+                memoryFlippedCards = [];
+                memoryLockBoard = false;
+
+                if (memoryMatchedCount === 7) {
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+                    }
+                    document.getElementById('memory-status-tag').innerText = `🎉 You Won in ${memoryMoves} Moves!`;
+                    document.getElementById('memory-status-tag').className = `text-sm font-bold px-4 py-2 bg-purple-100 text-purple-900 rounded-xl border border-purple-400`;
+                }
+            } else {
+                playSoundFx('wrong');
+                setTimeout(() => {
+                    document.getElementById(`memory-card-inner-${first.index}`).classList.remove('is-flipped');
+                    document.getElementById(`memory-card-inner-${second.index}`).classList.remove('is-flipped');
+                    memoryFlippedCards = [];
+                    memoryLockBoard = false;
+                }, 900);
+            }
+        }
+
+
+        /* ==========================================================================
+           8. FULLSCREEN TOGGLE SYSTEM
            ========================================================================== */
         function toggleFullscreen() {
             const btnText = document.getElementById('fullscreen-text');
